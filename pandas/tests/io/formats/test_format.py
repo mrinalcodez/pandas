@@ -18,6 +18,7 @@ from pandas import (
     MultiIndex,
     NaT,
     Series,
+    Timedelta,
     Timestamp,
     date_range,
     get_option,
@@ -2345,3 +2346,73 @@ def test_filepath_or_buffer_bad_arg_raises(float_frame, method):
     msg = "buf is not a file name and it has no write method"
     with pytest.raises(TypeError, match=msg):
         getattr(float_frame, method)(buf=object())
+
+
+def test_display_timedelta_format():
+    ser = Series(
+        [Timedelta("5m9s")],
+        dtype="timedelta64[ns]",
+    )
+
+    with option_context(
+        "display.timedelta_format",
+        lambda td: f"{td.components.minutes}m",
+    ):
+        result = repr(ser)
+
+    expected = "0   5m\ndtype: timedelta64[ns]"
+
+    assert result == expected
+
+
+def test_display_timestamp_format():
+    ser = Series(
+        [Timestamp("2025-01-01 12:34:56")],
+        dtype="datetime64[ns]",
+    )
+
+    with option_context(
+        "display.timestamp_format",
+        lambda ts: ts.strftime("%Y-%m"),
+    ):
+        result = repr(ser)
+
+    expected = "0   2025-01\ndtype: datetime64[ns]"
+
+    assert result == expected
+
+
+def test_display_timedelta_format_reset_option():
+    ser = Series(
+        [Timedelta("5m9s")],
+        dtype="timedelta64[ns]",
+    )
+
+    with option_context(
+        "display.timedelta_format",
+        lambda td: "custom",
+    ):
+        custom_result = repr(ser)
+
+    default_result = repr(ser)
+
+    assert "custom" in custom_result
+    assert "0 days 00:05:09" in default_result
+
+
+def test_display_timedelta_format_respects_explicit_formatter():
+    ser = Series(
+        [Timedelta("5m9s")],
+        dtype="timedelta64[ns]",
+    )
+
+    with option_context(
+        "display.timedelta_format",
+        lambda td: "global",
+    ):
+        result = fmt.format_array(
+            ser._values,
+            formatter=lambda td: "explicit",
+        )
+
+    assert result == ["explicit"]

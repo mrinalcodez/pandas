@@ -1129,11 +1129,17 @@ def format_array(
     if lib.is_np_dtype(values.dtype, "M") or isinstance(values.dtype, DatetimeTZDtype):
         fmt_klass = _Datetime64Formatter
         values = cast("DatetimeArray", values)
+
+        if formatter is None:
+            formatter = config["display"]["timestamp_format"]
         if na_rep == "NaN":
             na_rep = "NaT"
     elif lib.is_np_dtype(values.dtype, "m"):
         fmt_klass = _Timedelta64Formatter
         values = cast("TimedeltaArray", values)
+
+        if formatter is None:
+            formatter = config["display"]["timedelta_format"]
         if na_rep == "NaN":
             na_rep = "NaT"
     elif isinstance(values.dtype, ExtensionDtype):

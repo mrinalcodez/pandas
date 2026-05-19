@@ -177,6 +177,18 @@ float_format_doc = """
     See formats.format.EngFormatter for an example.
 """
 
+timedelta_format_doc = """
+: callable
+    The callable should accept a Timedelta object and return
+    a string with the desired display representation.
+"""
+
+timestamp_format_doc = """
+: callable
+    The callable should accept a Timestamp object and return
+    a string with the desired format.
+"""
+
 max_colwidth_doc = """
 : int or None
     The maximum width in characters of a column in the repr of
@@ -317,6 +329,18 @@ with cf.config_prefix("display"):
         "float_format",
         None,
         float_format_doc,
+        validator=is_one_of_factory([None, is_callable]),
+    )
+    cf.register_option(
+        "timedelta_format",
+        None,
+        timedelta_format_doc,
+        validator=is_one_of_factory([None, is_callable]),
+    )
+    cf.register_option(
+        "timestamp_format",
+        None,
+        timestamp_format_doc,
         validator=is_one_of_factory([None, is_callable]),
     )
     cf.register_option(
